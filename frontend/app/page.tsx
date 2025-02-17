@@ -188,7 +188,7 @@ export default function Home() {
           posts.map((p) => (
             <div
               key={p.id}
-              className="flex flex-col border rounded-md p-2 gap-2"
+              className="flex flex-col rounded-md p-2 gap-2 bg-[#ffffff]"
             >
               <div className="flex items-center gap-3">
                 {/* <p className="w-4">{p.votes}</p> */}
