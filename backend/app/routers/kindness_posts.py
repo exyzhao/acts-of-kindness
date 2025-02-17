@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import select
 
-from app.database import KindnessPost, Vote, SessionDep
+from app.database import SessionDep
+from app.models import KindnessPost
 
 
 router = APIRouter()

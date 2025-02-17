@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 from sqlmodel import select
 
-from app.database import Vote, SessionDep
+from app.database import SessionDep
+from app.models import Vote
 
 
 router = APIRouter()
