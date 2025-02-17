@@ -88,7 +88,7 @@ async def get_current_user(
 
 
 def authenticate_user(username: str, password: str, session: SessionDep):
-    user = get_user(session, username)
+    user = get_user(username=username, session=session)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -96,22 +96,22 @@ def authenticate_user(username: str, password: str, session: SessionDep):
     return user
 
 
-@router.post("/users", response_model=User, status_code=201)
+@router.post("/register", response_model=User, status_code=201)
 def create_user(
-    user_creation: UserCreate,
+    user_create: UserCreate,
     session: SessionDep,
 ):
-    existing_user = session.get(User, user_creation.username)
+    existing_user = session.get(User, user_create.username)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already taken",
         )
 
-    hashed_pw = get_password_hash(user_creation.password)
+    hashed_pw = get_password_hash(user_create.password)
 
     new_user = User(
-        username=user_creation.username,
+        **dict(user_create),
         hashed_password=hashed_pw,
     )
 
@@ -141,7 +141,7 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@router.get("/users/me/", response_model=User)
+@router.get("/me/", response_model=User)
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_user)],
 ):

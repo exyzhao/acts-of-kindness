@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlmodel import Field, Relationship, SQLModel
 
 
-class UserCreate(SQLModel):
+class BaseUser(SQLModel):
     username: str = Field(primary_key=True)
     email: str | None = None
     full_name: str | None = None
@@ -11,7 +11,11 @@ class UserCreate(SQLModel):
     created_at: datetime = Field(default=datetime.utcnow(), nullable=False)
 
 
-class User(UserCreate, table=True):
+class UserCreate(BaseUser):
+    password: str
+
+
+class User(BaseUser, table=True):
     hashed_password: str
 
 
