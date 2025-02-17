@@ -25,6 +25,12 @@ class KindnessPostCreate(SQLModel):
 
 class KindnessPost(KindnessPostCreate, table=True):
     poster_username: str = Field(foreign_key="user.username")
+    votes: list["Vote"] = Relationship(back_populates="kindness_post")
+
+
+class KindnessPostWithVoteAmount(KindnessPostCreate):
+    poster_username: str = Field(foreign_key="user.username")
+    total_vote_amount: int
 
 
 class VoteCreate(SQLModel):
@@ -35,3 +41,4 @@ class VoteCreate(SQLModel):
 
 class Vote(VoteCreate, table=True):
     voter_username: str = Field(foreign_key="user.username")
+    kindness_post: KindnessPost = Relationship(back_populates="votes")

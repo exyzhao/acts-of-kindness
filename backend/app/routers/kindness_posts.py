@@ -4,7 +4,12 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlmodel import select
 
 from app.database import SessionDep
-from app.models import KindnessPost, KindnessPostCreate, User, Vote
+from app.models import (
+    KindnessPost,
+    KindnessPostCreate,
+    User,
+    KindnessPostWithVoteAmount,
+)
 from app.routers.auth import get_current_user
 
 
@@ -19,13 +24,24 @@ async def root():
 @router.get("/")
 async def get_kindness_posts(
     session: SessionDep, offset: int = 0, limit: Annotated[int, Query(le=100)] = 100
-) -> list[KindnessPost]:
-    return session.exec(
+) -> list[KindnessPostWithVoteAmount]:
+    kindness_posts = session.exec(
         select(KindnessPost)
         .order_by(KindnessPost.created_at.desc())
         .offset(offset)
         .limit(limit)
     ).all()
+
+    kindness_posts_with_vote_amounts = []
+
+    for kindness_post in kindness_posts:
+        vote_amount = sum(vote.vote_amount for vote in kindness_post.votes)
+        with_vote_amount = KindnessPostWithVoteAmount(
+            **dict(kindness_post), total_vote_amount=vote_amount
+        )
+        kindness_posts_with_vote_amounts.append(with_vote_amount)
+
+    return kindness_posts_with_vote_amounts
 
 
 @router.get("/{post_id}")
