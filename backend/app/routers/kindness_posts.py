@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlmodel import select
 
 from app.database import SessionDep
-from app.models import KindnessPost, KindnessPostCreate, User
+from app.models import KindnessPost, KindnessPostCreate, User, Vote
 from app.routers.auth import get_current_user
 
 

@@ -145,4 +145,7 @@ async def login_for_access_token(
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return current_user
+    return {
+        "username": current_user.username,
+        "created_at": current_user.created_at,
+    }

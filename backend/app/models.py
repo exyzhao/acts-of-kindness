@@ -27,10 +27,11 @@ class KindnessPost(KindnessPostCreate, table=True):
     poster_username: str = Field(foreign_key="user.username")
 
 
-class Vote(SQLModel, table=True):
+class VoteCreate(SQLModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     vote_amount: int
-    voter_username: str
-    kindness_post_id: int
+    kindness_post_id: uuid.UUID = Field(foreign_key="kindnesspost.id")
 
-    poster_username: str = Field(foreign_key="user.username")
+
+class Vote(VoteCreate, table=True):
+    voter_username: str = Field(foreign_key="user.username")
