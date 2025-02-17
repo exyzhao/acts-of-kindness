@@ -4,7 +4,12 @@ version = "0.1.0"
 description = "Backend for acts-of-kindness"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["fastapi[standard]>=0.115.8"]
+dependencies = [
+    "fastapi[standard]>=0.115.8",
+    "psycopg-binary>=3.2.4",
+    "psycopg[binary]>=3.2.4",
+    "sqlmodel>=0.0.22",
+]
 
 [tool.mypy]
 ignore_missing_imports = true

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: aok-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aokdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  fastapi:
+    build: .
+    container_name: aok-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/aokdb
+    volumes:
+      - .:/app
+    command: ["uv", "run", "fastapi", "dev", "--host", "0.0.0.0"]
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+
+volumes:
+  postgres_data:
+
