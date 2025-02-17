@@ -48,11 +48,3 @@ async def delete_kindness_post(post_id: int, session: SessionDep):
     session.commit()
 
     return {"ok": True}
-
-
-@router.post("/votes")
-async def vote_on_kindness_post(vote: Vote, session: SessionDep) -> Vote:
-    session.add(vote)
-    session.commit()
-    session.refresh(vote)
-    return vote

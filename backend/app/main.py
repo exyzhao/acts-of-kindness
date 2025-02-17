@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 
 from app.database import create_db_and_tables
-from app.internal import admin
-from app.routers import kindness_post
+from app.routers import kindness_posts, votes
 
 
 app = FastAPI(
@@ -11,10 +10,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(
-    kindness_post.router, prefix="/kindness_posts", tags=["kindness_posts"]
+    kindness_posts.router, prefix="/kindness_posts", tags=["kindness_posts"]
 )
+app.include_router(votes.router, prefix="/votes", tags=["votes"])
 
 
 @app.on_event("startup")
