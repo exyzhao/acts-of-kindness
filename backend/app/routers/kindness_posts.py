@@ -1,17 +1,20 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlmodel import select
 
 from app.database import SessionDep
-from app.models import KindnessPost
+from app.models import KindnessPost, KindnessPostCreate, User
+from app.routers.auth import get_current_user
 
 
 router = APIRouter()
 
+
 @router.get("/ping")
 async def root():
     return {"message": "pong"}
+
 
 @router.get("/")
 async def get_kindness_posts(
@@ -35,19 +38,31 @@ async def get_kindness_post_by_id(post_id: int, session: SessionDep) -> Kindness
 
 @router.post("/")
 async def create_kindness_post(
-    kindness_post: KindnessPost, session: SessionDep
+    kindness_post: KindnessPostCreate,
+    session: SessionDep,
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> KindnessPost:
-    session.add(kindness_post)
+    new_kindness_post = KindnessPost(
+        **dict(kindness_post), poster_username=current_user.username
+    )
+
+    session.add(new_kindness_post)
     session.commit()
-    session.refresh(kindness_post)
-    return kindness_post
+    session.refresh(new_kindness_post)
+    return new_kindness_post
 
 
 @router.delete("/{post_id}")
-async def delete_kindness_post(post_id: int, session: SessionDep):
+async def delete_kindness_post(
+    post_id: int,
+    session: SessionDep,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
     kindness_post = session.get(KindnessPost, post_id)
     if not kindness_post:
         raise HTTPException(status_code=404, detail="Post not found")
+    if kindness_post.poster_username != current_user.username:
+        raise HTTPException(status_code=403, detail="Not authorized")
     session.delete(kindness_post)
     session.commit()
 
