@@ -23,7 +23,7 @@ class KindnessPost(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     description: str
     created_at: datetime = Field(default=datetime.utcnow(), nullable=False)
-    poster_username: str = Field(foreign_key="user.username")
+    poster_username: str
     # votes: list["Vote"] = Relationship(back_populates="kindness_post")
 
 
@@ -31,5 +31,5 @@ class Vote(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     # kindness_post: KindnessPost = Relationship(back_populates="votes")
     vote_amount: int
-    voter_username: str = Field(foreign_key="user.username")
-    kindness_post_id: int = Field(foreign_key="kindnesspost.id")
+    voter_username: str
+    kindness_post_id: int
