@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlmodel import Field, Relationship, SQLModel
 
 
-class UserCreation(SQLModel, table=True):
+class UserCreate(SQLModel):
     username: str = Field(primary_key=True)
     email: str | None = None
     full_name: str | None = None
@@ -11,7 +11,7 @@ class UserCreation(SQLModel, table=True):
     created_at: datetime = Field(default=datetime.utcnow(), nullable=False)
 
 
-class User(UserCreation, table=True):
+class User(UserCreate, table=True):
     hashed_password: str
 
 
@@ -20,11 +20,12 @@ class KindnessPost(SQLModel, table=True):
     description: str
     created_at: datetime = Field(default=datetime.utcnow(), nullable=False)
     poster_username: str = Field(foreign_key="user.username")
-    votes: list["Vote"] = Relationship(back_populates="kindness_post")
+    # votes: list["Vote"] = Relationship(back_populates="kindness_post")
 
 
 class Vote(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    kindness_post: KindnessPost = Relationship(back_populates="votes")
+    # kindness_post: KindnessPost = Relationship(back_populates="votes")
     vote_amount: int
     voter_username: str = Field(foreign_key="user.username")
+    kindness_post_id: int = Field(foreign_key="kindnesspost.id")

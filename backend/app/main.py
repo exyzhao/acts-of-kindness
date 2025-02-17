@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import create_db_and_tables
+from app.database import create_db_and_tables, reset_db_and_tables
 from app.routers import kindness_posts, auth, votes
 
 
@@ -38,3 +38,9 @@ def on_startup():
 @app.get("/")
 async def root():
     return {"message": "acts of kindness backend"}
+
+
+@app.post("/reset_db")
+async def reset_db():
+    reset_db_and_tables()
+    return {"message": "database reset"}
