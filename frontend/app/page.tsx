@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Session } from "next-auth";
 
 interface KindnessPost {
@@ -39,7 +39,7 @@ const AuthButtons = ({ session }: { session: Session | null }) => {
     <div className="flex justify-between items-center">
       <p>Welcome, {session.user?.name}!</p>
       <button
-        // onClick={() => signOut()}
+        onClick={() => signOut()}
         className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
       >
         Sign Out
