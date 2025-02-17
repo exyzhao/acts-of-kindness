@@ -7,7 +7,6 @@ import {
 } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
 
@@ -52,10 +51,10 @@ const AuthButtons = ({ session }: { session: Session | null }) => {
 export default function Home() {
   const { data: session } = useSession();
 
-  const [posts, setPosts] = useState<KindnessPost[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [description, setDescription] = useState("");
+  const [posts, setPosts] = useState<KindnessPost[]>([]);
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  const [createPostMessage, setCreatePostMessage] = useState("");
 
   // selectedStates will map post IDs to a vote/reaction:
   // -1 = frown, 0 = meh, 1 = smile, or undefined if no selection.
@@ -112,11 +111,11 @@ export default function Home() {
 
   // Upload Modal Logic
   const openModal = () => {
-    setIsModalOpen(true);
+    setIsCreatePostModalOpen(true);
   };
   const closeModal = () => {
-    setIsModalOpen(false);
-    setDescription("");
+    setIsCreatePostModalOpen(false);
+    setCreatePostMessage("");
   };
 
   const handleUpload = async (e: React.MouseEvent<HTMLElement>) => {
@@ -134,7 +133,7 @@ export default function Home() {
           Authorization: `Bearer ${session.accessToken}`,
         },
         body: JSON.stringify({
-          message: description,
+          message: createPostMessage,
           poster_username: "Brian Williams",
         }),
       });
@@ -192,7 +191,7 @@ export default function Home() {
         </button>
       )}
 
-      {isModalOpen && (
+      {isCreatePostModalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
           onClick={closeModal}
@@ -204,8 +203,8 @@ export default function Home() {
             <h2 className="text-xl mb-4">Upload New Post</h2>
 
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={createPostMessage}
+              onChange={(e) => setCreatePostMessage(e.target.value)}
               placeholder="How were you kind today?"
               className="w-full h-24 p-2 border border-gray-300 rounded-md mb-4"
             />
