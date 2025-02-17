@@ -9,6 +9,9 @@ from app.models import KindnessPost
 
 router = APIRouter()
 
+@router.get("/ping")
+async def root():
+    return {"message": "pong"}
 
 @router.get("/")
 async def get_kindness_posts(
