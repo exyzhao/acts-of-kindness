@@ -21,6 +21,5 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-
 postgres_url = os.getenv("DATABASE_URL")
 engine = create_engine(postgres_url, echo=True)

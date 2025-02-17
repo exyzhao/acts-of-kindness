@@ -1,5 +1,4 @@
 "use client";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFaceFrown,
@@ -7,6 +6,10 @@ import {
   faFaceSmile,
 } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
 
 interface KindnessPost {
   id: number;
@@ -15,23 +18,62 @@ interface KindnessPost {
   created_at: string; // or Date if you convert it
 }
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+const AuthButtons = ({ session }: { session: Session | null }) => {
+  return !session ? (
+    <div className="flex gap-4 justify-end">
+      <Link
+        href="/login"
+        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+      >
+        Login
+      </Link>
+      <Link
+        href="/register"
+        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+      >
+        Register
+      </Link>
+    </div>
+  ) : (
+    <div className="flex justify-between items-center">
+      <p>Welcome, {session.user?.name}!</p>
+      <button
+        // onClick={() => signOut()}
+        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+      >
+        Sign Out
+      </button>
+    </div>
+  );
+};
+
 export default function Home() {
+  const { data: session } = useSession();
+
   const [posts, setPosts] = useState<KindnessPost[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [description, setDescription] = useState("");
 
+  // selectedStates will map post IDs to a vote/reaction:
+  // -1 = frown, 0 = meh, 1 = smile, or undefined if no selection.
+  const [selectedStates, setSelectedStates] = useState<{
+    [postId: number]: number;
+  }>({});
+
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const response = await fetch("http://localhost:8000/kindness_posts/");
+        const response = await fetch(`${apiUrl}/kindness_posts/`);
         if (!response.ok) {
           throw new Error(`Error fetching posts: status ${response.status}`);
         }
         const data = await response.json();
         setPosts(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : String(err));
       }
     }
 
@@ -69,7 +111,6 @@ export default function Home() {
   // ];
 
   // Upload Modal Logic
-
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -81,14 +122,19 @@ export default function Home() {
   const handleUpload = async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
 
+    if (!session) {
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:8000/kindness_posts/", {
+      const response = await fetch(`${apiUrl}/kindness_posts/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
         },
         body: JSON.stringify({
-          description,
+          message: description,
           poster_username: "Brian Williams",
         }),
       });
@@ -108,12 +154,6 @@ export default function Home() {
       console.error("Error creating post:", error);
     }
   };
-
-  // selectedStates will map post IDs to a vote/reaction:
-  // -1 = frown, 0 = meh, 1 = smile, or undefined if no selection.
-  const [selectedStates, setSelectedStates] = useState<{
-    [postId: number]: number;
-  }>({});
 
   const handleSelect = (postId: number, reaction: number) => {
     setSelectedStates((prev) => {
@@ -136,17 +176,22 @@ export default function Home() {
 
   return (
     <main className="flex flex-col gap-6 py-6">
+      <AuthButtons session={session} />
+
       <div>
         <h1 className="text-xl">Who is the kindest person?</h1>
         <p>Current Leader:</p>
       </div>
 
-      <button
-        onClick={openModal}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md"
-      >
-        Create New Post
-      </button>
+      {session && (
+        <button
+          onClick={openModal}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md"
+        >
+          Create New Post
+        </button>
+      )}
+
       {isModalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
@@ -182,6 +227,7 @@ export default function Home() {
           </div>
         </div>
       )}
+
       <div className="flex flex-col gap-5">
         <h2>Acts of Kindness</h2>
         {posts.length > 0 &&

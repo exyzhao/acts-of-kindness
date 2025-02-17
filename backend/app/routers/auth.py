@@ -1,6 +1,9 @@
 from typing import Annotated
 from datetime import datetime, timedelta, timezone
 
+import os
+from dotenv import load_dotenv
+
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -16,11 +19,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 router = APIRouter()
 
+load_dotenv()
 
-# TODO: Move to .env
-SECRET_KEY = "154d0fecf91c98d6ac46ff17edbbdc0410ce4081b2e7a3d9f28003a02e50b3cb"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY") or ""
+ALGORITHM = os.getenv("ALGORITHM") or "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES") or "30")
 
 
 class Token(BaseModel):
